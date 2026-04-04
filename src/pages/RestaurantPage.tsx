@@ -24,7 +24,7 @@ const RestaurantPage = () => {
   return (
     <div className="min-h-screen bg-background pb-28">
       {/* Header Image */}
-      <div className="relative h-52 overflow-hidden">
+      <div className="relative h-52 md:h-64 lg:h-80 overflow-hidden">
         <img src={restaurant.image} alt={restaurant.name} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 to-transparent" />
         <button
@@ -33,8 +33,8 @@ const RestaurantPage = () => {
         >
           <ArrowLeft className="w-5 h-5 text-foreground" />
         </button>
-        <div className="absolute bottom-4 left-4 right-4">
-          <h1 className="text-xl font-extrabold text-card">{restaurant.name}</h1>
+        <div className="absolute bottom-4 left-4 right-4 md:bottom-6 md:left-8 md:right-8">
+          <h1 className="text-xl md:text-2xl lg:text-3xl font-extrabold text-card">{restaurant.name}</h1>
           <div className="flex items-center gap-3 mt-1 text-sm text-card/80">
             <span className="flex items-center gap-1">
               <Star className="w-3.5 h-3.5 fill-badge-new text-badge-new" />
@@ -52,7 +52,7 @@ const RestaurantPage = () => {
         </div>
       </div>
 
-      <div className="max-w-md mx-auto px-4 space-y-4 mt-4">
+      <div className="max-w-3xl mx-auto px-4 md:px-6 space-y-4 mt-4">
         {/* Tags & Delivery Info */}
         <div className="flex items-center gap-2 flex-wrap">
           {restaurant.tags.map((tag) => (
@@ -77,8 +77,8 @@ const RestaurantPage = () => {
 
         {/* Menu */}
         <div>
-          <h2 className="text-lg font-bold text-foreground mb-3">Menu</h2>
-          <div className="space-y-3">
+          <h2 className="text-lg md:text-xl font-bold text-foreground mb-3">Menu</h2>
+          <div className="space-y-3 md:grid md:grid-cols-2 md:gap-4 md:space-y-0">
             {restaurant.menu.map((item) => {
               const cartItem = items.find((i) => i.menuItem.id === item.id);
               const qty = cartItem?.quantity || 0;
@@ -94,7 +94,7 @@ const RestaurantPage = () => {
                     loading="lazy"
                     width={80}
                     height={80}
-                    className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
+                    className="w-20 h-20 md:w-24 md:h-24 rounded-lg object-cover flex-shrink-0"
                   />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
