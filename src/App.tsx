@@ -44,7 +44,7 @@ const App = () => (
         <CartProvider>
           <Toaster />
           <Sonner />
-          <BrowserRouter>
+          <HashRouter>
             <Routes>
               <Route path="/auth" element={<PublicRoute><AuthPage /></PublicRoute>} />
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
