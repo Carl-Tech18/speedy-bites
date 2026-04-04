@@ -9,10 +9,10 @@ const CartBar = () => {
   if (totalItems === 0) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 p-4 animate-slide-up">
+    <div className="fixed bottom-0 left-0 right-0 z-50 p-4 animate-slide-up md:bottom-4 md:right-6 md:left-auto md:w-auto md:p-0">
       <button
         onClick={() => navigate("/cart")}
-        className="w-full max-w-md mx-auto flex items-center justify-between bg-primary text-primary-foreground rounded-2xl px-5 py-4 shadow-xl hover:opacity-95 transition-opacity"
+        className="w-full max-w-md mx-auto md:max-w-none md:mx-0 flex items-center justify-between bg-primary text-primary-foreground rounded-2xl px-5 py-4 shadow-xl hover:opacity-95 transition-opacity md:gap-6"
       >
         <div className="flex items-center gap-3">
           <div className="relative">
