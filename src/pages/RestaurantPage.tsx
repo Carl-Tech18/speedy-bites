@@ -2,7 +2,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { restaurants } from "@/data/restaurants";
 import { useCart } from "@/context/CartContext";
 import CartBar from "@/components/CartBar";
-import { ArrowLeft, Star, Clock, MapPin, Plus, Minus } from "lucide-react";
+import { ArrowLeft, Star, Clock, MapPin, Plus, Minus, Share2 } from "lucide-react";
+import { motion } from "framer-motion";
 
 const RestaurantPage = () => {
   const { id } = useParams();
@@ -24,37 +25,58 @@ const RestaurantPage = () => {
   return (
     <div className="min-h-screen bg-background pb-28">
       {/* Header Image */}
-      <div className="relative h-52 md:h-64 lg:h-80 overflow-hidden">
+      <div className="relative h-56 md:h-72 lg:h-80 overflow-hidden">
         <img src={restaurant.image} alt={restaurant.name} className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 to-transparent" />
-        <button
-          onClick={() => navigate(-1)}
-          className="absolute top-4 left-4 w-9 h-9 rounded-full bg-card/80 backdrop-blur flex items-center justify-center"
+        <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent" />
+        <div className="absolute top-4 left-4 right-4 flex justify-between">
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => navigate(-1)}
+            className="w-10 h-10 rounded-full bg-card/80 backdrop-blur-md flex items-center justify-center hover:bg-card transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5 text-foreground" />
+          </motion.button>
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            className="w-10 h-10 rounded-full bg-card/80 backdrop-blur-md flex items-center justify-center hover:bg-card transition-colors"
+          >
+            <Share2 className="w-4 h-4 text-foreground" />
+          </motion.button>
+        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="absolute bottom-4 left-4 right-4 md:bottom-6 md:left-8 md:right-8"
         >
-          <ArrowLeft className="w-5 h-5 text-foreground" />
-        </button>
-        <div className="absolute bottom-4 left-4 right-4 md:bottom-6 md:left-8 md:right-8">
-          <h1 className="text-xl md:text-2xl lg:text-3xl font-extrabold text-card">{restaurant.name}</h1>
-          <div className="flex items-center gap-3 mt-1 text-sm text-card/80">
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-extrabold text-card">{restaurant.name}</h1>
+          <div className="flex items-center gap-3 mt-1.5 text-sm text-card/80">
             <span className="flex items-center gap-1">
               <Star className="w-3.5 h-3.5 fill-badge-new text-badge-new" />
-              {restaurant.rating} ({restaurant.reviews})
+              <span className="font-semibold text-card">{restaurant.rating}</span> ({restaurant.reviews})
             </span>
+            <span className="text-card/40">•</span>
             <span className="flex items-center gap-1">
               <MapPin className="w-3.5 h-3.5" />
               {restaurant.distance} km
             </span>
+            <span className="text-card/40">•</span>
             <span className="flex items-center gap-1">
               <Clock className="w-3.5 h-3.5" />
               {time} min
             </span>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       <div className="max-w-3xl mx-auto px-4 md:px-6 space-y-4 mt-4">
         {/* Tags & Delivery Info */}
-        <div className="flex items-center gap-2 flex-wrap">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="flex items-center gap-2 flex-wrap"
+        >
           {restaurant.tags.map((tag) => (
             <span key={tag} className="px-2.5 py-1 bg-secondary text-secondary-foreground text-xs font-semibold rounded-full">
               {tag}
@@ -65,28 +87,39 @@ const RestaurantPage = () => {
           }`}>
             ₱{fee} delivery
           </span>
-        </div>
+        </motion.div>
 
         {/* Commission info */}
         {restaurant.isLocal && (
-          <div className="bg-local/10 rounded-xl p-3 text-sm text-local">
-            <span className="font-bold">🏠 Local Business</span>
-            <span className="ml-1.5 opacity-80">— Only 10-15% commission, supporting local entrepreneurs!</span>
-          </div>
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="bg-local/10 border border-local/20 rounded-2xl p-3.5 text-sm text-local flex items-start gap-2"
+          >
+            <span className="text-base">🏠</span>
+            <div>
+              <span className="font-bold">Local Business</span>
+              <span className="ml-1 opacity-80">— Only 10-15% commission, supporting local entrepreneurs!</span>
+            </div>
+          </motion.div>
         )}
 
         {/* Menu */}
         <div>
           <h2 className="text-lg md:text-xl font-bold text-foreground mb-3">Menu</h2>
           <div className="space-y-3 md:grid md:grid-cols-2 md:gap-4 md:space-y-0">
-            {restaurant.menu.map((item) => {
+            {restaurant.menu.map((item, index) => {
               const cartItem = items.find((i) => i.menuItem.id === item.id);
               const qty = cartItem?.quantity || 0;
 
               return (
-                <div
+                <motion.div
                   key={item.id}
-                  className="flex gap-3 bg-card rounded-xl border border-border p-3 animate-fade-in"
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 + index * 0.05 }}
+                  className="flex gap-3 bg-card rounded-2xl border border-border p-3 hover:border-primary/20 hover:shadow-md transition-all"
                 >
                   <img
                     src={item.image}
@@ -94,7 +127,7 @@ const RestaurantPage = () => {
                     loading="lazy"
                     width={80}
                     height={80}
-                    className="w-20 h-20 md:w-24 md:h-24 rounded-lg object-cover flex-shrink-0"
+                    className="w-20 h-20 md:w-24 md:h-24 rounded-xl object-cover flex-shrink-0"
                   />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
@@ -109,39 +142,49 @@ const RestaurantPage = () => {
                     <div className="flex items-center justify-between mt-2">
                       <span className="font-bold text-foreground">₱{item.price}</span>
                       {qty === 0 ? (
-                        <button
+                        <motion.button
+                          whileTap={{ scale: 0.85 }}
                           onClick={() => addItem(item, restaurant)}
-                          className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:opacity-90 transition-opacity"
+                          className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-sm shadow-primary/20 hover:shadow-md hover:shadow-primary/30 transition-shadow"
                         >
                           <Plus className="w-4 h-4" />
-                        </button>
+                        </motion.button>
                       ) : (
                         <div className="flex items-center gap-2">
-                          <button
+                          <motion.button
+                            whileTap={{ scale: 0.85 }}
                             onClick={() => updateQuantity(item.id, qty - 1)}
                             className="w-7 h-7 rounded-full bg-muted text-foreground flex items-center justify-center"
                           >
                             <Minus className="w-3.5 h-3.5" />
-                          </button>
-                          <span className="text-sm font-bold text-foreground w-4 text-center">{qty}</span>
-                          <button
+                          </motion.button>
+                          <motion.span
+                            key={qty}
+                            initial={{ scale: 1.3 }}
+                            animate={{ scale: 1 }}
+                            className="text-sm font-bold text-foreground w-4 text-center"
+                          >
+                            {qty}
+                          </motion.span>
+                          <motion.button
+                            whileTap={{ scale: 0.85 }}
                             onClick={() => addItem(item, restaurant)}
                             className="w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center"
                           >
                             <Plus className="w-3.5 h-3.5" />
-                          </button>
+                          </motion.button>
                         </div>
                       )}
                     </div>
                   </div>
-                </div>
+                </motion.div>
               );
             })}
           </div>
         </div>
 
         {/* Pickup Option */}
-        <div className="bg-muted rounded-xl p-4 text-center">
+        <div className="bg-muted rounded-2xl p-4 text-center">
           <p className="text-sm text-muted-foreground">
             🚶 <span className="font-semibold text-foreground">Direct Pickup Available</span> — Save on delivery fees!
           </p>
