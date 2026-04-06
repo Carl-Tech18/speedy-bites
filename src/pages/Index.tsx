@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import SearchBar from "@/components/SearchBar";
 import DeliveryToggle from "@/components/DeliveryToggle";
 import CategoryScroll from "@/components/CategoryScroll";
