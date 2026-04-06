@@ -29,7 +29,17 @@ const AuthPage = () => {
           email, password,
           options: { data: { display_name: displayName }, emailRedirectTo: window.location.origin },
         });
-        if (error) throw error;
+        if (error) {
+          // If user already exists, try logging them in instead
+          if (error.message?.includes("already registered")) {
+            const { error: loginError } = await supabase.auth.signInWithPassword({ email, password });
+            if (loginError) throw loginError;
+            toast.success("Welcome back! 🎉");
+            navigate("/");
+            return;
+          }
+          throw error;
+        }
         toast.success("Account created! Welcome! 🎉");
         navigate("/");
       }
