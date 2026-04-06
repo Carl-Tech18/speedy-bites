@@ -11,7 +11,38 @@ import { motion, AnimatePresence } from "framer-motion";
 const CartPage = () => {
   const navigate = useNavigate();
   const { items, restaurant, deliveryMode, subtotal, deliveryFee, total, updateQuantity, removeItem, clearCart } = useCart();
+  const { user } = useAuth();
   const [ordered, setOrdered] = useState(false);
+  const [placing, setPlacing] = useState(false);
+
+  const placeOrder = async () => {
+    if (!user || !restaurant) return;
+    setPlacing(true);
+    try {
+      const orderItems = items.map(({ menuItem, quantity }) => ({
+        name: menuItem.name,
+        price: menuItem.price,
+        quantity,
+      }));
+      const { error } = await supabase.from("orders").insert({
+        user_id: user.id,
+        restaurant_name: restaurant.name,
+        items: orderItems,
+        subtotal,
+        delivery_fee: deliveryFee,
+        total,
+        delivery_mode: deliveryMode,
+        status: "delivered",
+      } as any);
+      if (error) throw error;
+      setOrdered(true);
+      toast.success("Order placed successfully!");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to place order");
+    } finally {
+      setPlacing(false);
+    }
+  };
 
   if (ordered) {
     return (
