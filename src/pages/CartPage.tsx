@@ -1,5 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import DeliveryToggle from "@/components/DeliveryToggle";
 import { ArrowLeft, Plus, Minus, Trash2, CheckCircle, ShoppingBag } from "lucide-react";
 import { useState } from "react";
@@ -9,7 +11,38 @@ import { motion, AnimatePresence } from "framer-motion";
 const CartPage = () => {
   const navigate = useNavigate();
   const { items, restaurant, deliveryMode, subtotal, deliveryFee, total, updateQuantity, removeItem, clearCart } = useCart();
+  const { user } = useAuth();
   const [ordered, setOrdered] = useState(false);
+  const [placing, setPlacing] = useState(false);
+
+  const placeOrder = async () => {
+    if (!user || !restaurant) return;
+    setPlacing(true);
+    try {
+      const orderItems = items.map(({ menuItem, quantity }) => ({
+        name: menuItem.name,
+        price: menuItem.price,
+        quantity,
+      }));
+      const { error } = await supabase.from("orders").insert({
+        user_id: user.id,
+        restaurant_name: restaurant.name,
+        items: orderItems,
+        subtotal,
+        delivery_fee: deliveryFee,
+        total,
+        delivery_mode: deliveryMode,
+        status: "delivered",
+      } as any);
+      if (error) throw error;
+      setOrdered(true);
+      toast.success("Order placed successfully!");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to place order");
+    } finally {
+      setPlacing(false);
+    }
+  };
 
   if (ordered) {
     return (
@@ -176,10 +209,11 @@ const CartPage = () => {
 
             <motion.button
               whileTap={{ scale: 0.97 }}
-              onClick={() => { setOrdered(true); toast.success("Order placed successfully!"); }}
-              className="hidden md:block w-full bg-primary text-primary-foreground font-bold py-4 rounded-2xl text-center shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-shadow"
+              disabled={placing}
+              onClick={placeOrder}
+              className="hidden md:flex w-full bg-primary text-primary-foreground font-bold py-4 rounded-2xl items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-shadow disabled:opacity-60"
             >
-              Place Order · ₱{total.toFixed(0)}
+              {placing ? <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" /> : `Place Order · ₱${total.toFixed(0)}`}
             </motion.button>
           </div>
         </div>
@@ -189,10 +223,11 @@ const CartPage = () => {
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-md border-t border-border md:hidden">
         <motion.button
           whileTap={{ scale: 0.97 }}
-          onClick={() => { setOrdered(true); toast.success("Order placed successfully!"); }}
-          className="w-full max-w-md mx-auto block bg-primary text-primary-foreground font-bold py-4 rounded-2xl text-center shadow-lg shadow-primary/20"
+          disabled={placing}
+          onClick={placeOrder}
+          className="w-full max-w-md mx-auto flex items-center justify-center gap-2 bg-primary text-primary-foreground font-bold py-4 rounded-2xl shadow-lg shadow-primary/20 disabled:opacity-60"
         >
-          Place Order · ₱{total.toFixed(0)}
+          {placing ? <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" /> : `Place Order · ₱${total.toFixed(0)}`}
         </motion.button>
       </div>
     </div>

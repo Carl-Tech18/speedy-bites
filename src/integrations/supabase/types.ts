@@ -14,8 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      orders: {
+        Row: {
+          address: string | null
+          created_at: string
+          delivery_fee: number
+          delivery_mode: string
+          id: string
+          items: Json
+          restaurant_name: string
+          status: string
+          subtotal: number
+          total: number
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          delivery_fee?: number
+          delivery_mode?: string
+          id?: string
+          items?: Json
+          restaurant_name: string
+          status?: string
+          subtotal?: number
+          total?: number
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          delivery_fee?: number
+          delivery_mode?: string
+          id?: string
+          items?: Json
+          restaurant_name?: string
+          status?: string
+          subtotal?: number
+          total?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
+          address: string | null
           avatar_url: string | null
           created_at: string
           display_name: string | null
@@ -25,6 +68,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          address?: string | null
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
@@ -34,6 +78,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          address?: string | null
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
