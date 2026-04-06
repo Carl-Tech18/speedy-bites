@@ -1,5 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import DeliveryToggle from "@/components/DeliveryToggle";
 import { ArrowLeft, Plus, Minus, Trash2, CheckCircle, ShoppingBag } from "lucide-react";
 import { useState } from "react";
