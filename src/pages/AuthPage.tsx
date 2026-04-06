@@ -30,7 +30,8 @@ const AuthPage = () => {
           options: { data: { display_name: displayName }, emailRedirectTo: window.location.origin },
         });
         if (error) throw error;
-        toast.success("Account created! Check your email to verify.");
+        toast.success("Account created! Welcome! 🎉");
+        navigate("/");
       }
     } catch (err: any) {
       toast.error(err.message || "Something went wrong");
