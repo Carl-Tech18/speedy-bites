@@ -223,10 +223,11 @@ const CartPage = () => {
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-md border-t border-border md:hidden">
         <motion.button
           whileTap={{ scale: 0.97 }}
-          onClick={() => { setOrdered(true); toast.success("Order placed successfully!"); }}
-          className="w-full max-w-md mx-auto block bg-primary text-primary-foreground font-bold py-4 rounded-2xl text-center shadow-lg shadow-primary/20"
+          disabled={placing}
+          onClick={placeOrder}
+          className="w-full max-w-md mx-auto flex items-center justify-center gap-2 bg-primary text-primary-foreground font-bold py-4 rounded-2xl shadow-lg shadow-primary/20 disabled:opacity-60"
         >
-          Place Order · ₱{total.toFixed(0)}
+          {placing ? <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" /> : `Place Order · ₱${total.toFixed(0)}`}
         </motion.button>
       </div>
     </div>
