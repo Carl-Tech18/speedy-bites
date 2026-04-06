@@ -24,6 +24,7 @@ const fadeUp = {
 
 const Index = () => {
   const [activeCategory, setActiveCategory] = useState("all");
+  const navigate = useNavigate();
   const { deliveryMode } = useCart();
   const { user, signOut } = useAuth();
 
