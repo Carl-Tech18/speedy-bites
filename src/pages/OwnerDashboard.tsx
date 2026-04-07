@@ -41,6 +41,7 @@ const OwnerDashboard = () => {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [isOwner, setIsOwner] = useState(false);
   const [restaurant, setRestaurant] = useState<OwnerRestaurant | null>(null);
   const [menuItems, setMenuItems] = useState<OwnerMenuItem[]>([]);
   const [editingMenuIdx, setEditingMenuIdx] = useState<number | null>(null);
