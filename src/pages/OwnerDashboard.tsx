@@ -66,9 +66,10 @@ const OwnerDashboard = () => {
       .select("role")
       .eq("user_id", user.id);
 
-    const isOwner = roles?.some((r: any) => r.role === "owner");
+    const ownerFound = roles?.some((r: any) => r.role === "owner");
+    setIsOwner(!!ownerFound);
 
-    if (isOwner) {
+    if (ownerFound) {
       const { data: restaurants } = await supabase
         .from("owner_restaurants")
         .select("*")
@@ -83,13 +84,14 @@ const OwnerDashboard = () => {
           address: r.address || "", phone: r.phone || "", image_url: r.image_url,
           is_active: r.is_active,
         });
-        // Load menu items
         const { data: items } = await supabase
           .from("owner_menu_items")
           .select("*")
           .eq("restaurant_id", r.id)
           .order("sort_order");
         setMenuItems((items as any[]) || []);
+      } else {
+        setRestaurant(null);
       }
     }
     setLoading(false);
