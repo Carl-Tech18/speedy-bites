@@ -105,7 +105,7 @@ const Index = () => {
           transition={{ delay: 0.2 }}
           className="bg-card rounded-3xl p-4 shadow-lg shadow-foreground/5 border-2 border-border/50 space-y-3 max-w-2xl"
         >
-          <SearchBar />
+          <SearchBar value={searchQuery} onChange={setSearchQuery} />
           <div className="flex items-center justify-between">
             <span className="text-xs text-muted-foreground font-bold">Delivery mode:</span>
             <DeliveryToggle />
