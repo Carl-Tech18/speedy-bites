@@ -24,6 +24,7 @@ const fadeUp = {
 
 const Index = () => {
   const [activeCategory, setActiveCategory] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
   const { deliveryMode } = useCart();
   const { user } = useAuth();
