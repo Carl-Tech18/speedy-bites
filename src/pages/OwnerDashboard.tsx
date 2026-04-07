@@ -41,6 +41,7 @@ const OwnerDashboard = () => {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [isOwner, setIsOwner] = useState(false);
   const [restaurant, setRestaurant] = useState<OwnerRestaurant | null>(null);
   const [menuItems, setMenuItems] = useState<OwnerMenuItem[]>([]);
   const [editingMenuIdx, setEditingMenuIdx] = useState<number | null>(null);
@@ -65,9 +66,10 @@ const OwnerDashboard = () => {
       .select("role")
       .eq("user_id", user.id);
 
-    const isOwner = roles?.some((r: any) => r.role === "owner");
+    const ownerFound = roles?.some((r: any) => r.role === "owner");
+    setIsOwner(!!ownerFound);
 
-    if (isOwner) {
+    if (ownerFound) {
       const { data: restaurants } = await supabase
         .from("owner_restaurants")
         .select("*")
@@ -82,13 +84,14 @@ const OwnerDashboard = () => {
           address: r.address || "", phone: r.phone || "", image_url: r.image_url,
           is_active: r.is_active,
         });
-        // Load menu items
         const { data: items } = await supabase
           .from("owner_menu_items")
           .select("*")
           .eq("restaurant_id", r.id)
           .order("sort_order");
         setMenuItems((items as any[]) || []);
+      } else {
+        setRestaurant(null);
       }
     }
     setLoading(false);
@@ -249,8 +252,8 @@ const OwnerDashboard = () => {
       </div>
 
       <div className="max-w-2xl mx-auto px-4 -mt-6 relative z-10 pb-12 space-y-4">
-        {!restaurant ? (
-          /* Onboarding */
+        {!isOwner ? (
+          /* Not an owner yet */
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -259,9 +262,9 @@ const OwnerDashboard = () => {
             <div className="w-20 h-20 rounded-3xl bg-accent/10 mx-auto flex items-center justify-center mb-4">
               <Store className="w-10 h-10 text-accent" />
             </div>
-            <h2 className="text-xl font-display font-bold text-foreground mb-2">Start Your Restaurant</h2>
+            <h2 className="text-xl font-display font-bold text-foreground mb-2">Become a Restaurant Owner</h2>
             <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto">
-              List your restaurant on QuickBITE and start receiving orders from hungry customers nearby!
+              Register as a restaurant owner to list your business on QuickBITE and start receiving orders!
             </p>
             <motion.button
               onClick={becomeOwner}
@@ -272,6 +275,93 @@ const OwnerDashboard = () => {
               {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : "Register as Owner 🚀"}
             </motion.button>
           </motion.div>
+        ) : !restaurant ? (
+          /* Owner but no restaurant yet - show creation form */
+          <>
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-card rounded-3xl p-5 shadow-sm border-2 border-border/50 space-y-4"
+            >
+              <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+                <div className="w-7 h-7 rounded-xl bg-accent/10 flex items-center justify-center">
+                  <Store className="w-4 h-4 text-accent" />
+                </div>
+                Create Your Restaurant
+              </h3>
+              <p className="text-xs text-muted-foreground">You're registered as an owner! Now set up your restaurant details below.</p>
+
+              {/* Restaurant image */}
+              <div
+                onClick={() => imgInputRef.current?.click()}
+                className="relative w-full h-40 rounded-2xl bg-warm-glow border-2 border-dashed border-border overflow-hidden cursor-pointer hover:border-primary/30 transition-colors group"
+              >
+                {form.image_url ? (
+                  <img src={form.image_url} alt="Restaurant" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+                    <ImagePlus className="w-8 h-8 mb-2" />
+                    <span className="text-sm font-medium">Upload restaurant photo</span>
+                  </div>
+                )}
+                {uploadingImg && (
+                  <div className="absolute inset-0 bg-background/70 flex items-center justify-center">
+                    <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                  </div>
+                )}
+              </div>
+              <input
+                ref={imgInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  setUploadingImg(true);
+                  const url = await handleImageUpload(file, "restaurant");
+                  if (url) setForm((prev) => ({ ...prev, image_url: url }));
+                  setUploadingImg(false);
+                }}
+              />
+
+              <div className="space-y-3">
+                <div>
+                  <label className="text-xs font-bold text-muted-foreground mb-1.5 block">Restaurant Name *</label>
+                  <input type="text" value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} className={inputClass} placeholder="e.g. Lola's Kitchen" />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-muted-foreground mb-1.5 block">Description</label>
+                  <textarea value={form.description} onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))} className={`${inputClass} resize-none min-h-[80px]`} placeholder="Tell customers about your restaurant..." />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-bold text-muted-foreground mb-1.5 block">Cuisine</label>
+                    <select value={form.cuisine} onChange={(e) => setForm((p) => ({ ...p, cuisine: e.target.value }))} className={inputClass}>
+                      {cuisineOptions.map((c) => (<option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-muted-foreground mb-1.5 block">Phone</label>
+                    <input type="tel" value={form.phone} onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))} className={inputClass} placeholder="+63..." />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-muted-foreground mb-1.5 block">Address</label>
+                  <input type="text" value={form.address} onChange={(e) => setForm((p) => ({ ...p, address: e.target.value }))} className={inputClass} placeholder="Street, City..." />
+                </div>
+              </div>
+
+              <motion.button
+                onClick={saveRestaurant}
+                disabled={saving}
+                whileTap={{ scale: 0.98 }}
+                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-accent text-accent-foreground font-extrabold text-sm shadow-lg shadow-accent/20 disabled:opacity-60"
+              >
+                {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Save className="w-4 h-4" /> Create Restaurant</>}
+              </motion.button>
+            </motion.div>
+          </>
         ) : (
           <>
             {/* Restaurant Details */}
