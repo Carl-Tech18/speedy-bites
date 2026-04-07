@@ -24,6 +24,7 @@ const fadeUp = {
 
 const Index = () => {
   const [activeCategory, setActiveCategory] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
   const { deliveryMode } = useCart();
   const { user } = useAuth();
@@ -31,9 +32,21 @@ const Index = () => {
   const displayName = user?.user_metadata?.display_name || user?.email?.split("@")[0] || "there";
 
   const filtered = useMemo(() => {
-    if (activeCategory === "all") return restaurants;
-    return restaurants.filter((r) => r.cuisine === activeCategory);
-  }, [activeCategory]);
+    let list = restaurants;
+    if (activeCategory !== "all") {
+      list = list.filter((r) => r.cuisine === activeCategory);
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      list = list.filter(
+        (r) =>
+          r.name.toLowerCase().includes(q) ||
+          r.cuisine.toLowerCase().includes(q) ||
+          r.menu.some((m) => m.name.toLowerCase().includes(q))
+      );
+    }
+    return list;
+  }, [activeCategory, searchQuery]);
 
   const cheapest = useMemo(
     () => [...restaurants].sort((a, b) => a.menu[0].price - b.menu[0].price).slice(0, 3),
@@ -92,7 +105,7 @@ const Index = () => {
           transition={{ delay: 0.2 }}
           className="bg-card rounded-3xl p-4 shadow-lg shadow-foreground/5 border-2 border-border/50 space-y-3 max-w-2xl"
         >
-          <SearchBar />
+          <SearchBar value={searchQuery} onChange={setSearchQuery} />
           <div className="flex items-center justify-between">
             <span className="text-xs text-muted-foreground font-bold">Delivery mode:</span>
             <DeliveryToggle />
@@ -114,47 +127,25 @@ const Index = () => {
         {/* Categories */}
         <CategoryScroll active={activeCategory} onChange={setActiveCategory} />
 
-        {/* Support Local Section */}
-        {activeCategory === "all" && (
-          <Section title="🏠 Support Local" subtitle="Small businesses near you">
-            <motion.div variants={stagger} initial="hidden" animate="show" className={`grid ${gridCols} gap-3 md:gap-4`}>
-              {localSpots.map((r) => (
-                <motion.div key={r.id} variants={fadeUp}>
-                  <RestaurantCard restaurant={r} />
-                </motion.div>
-              ))}
-            </motion.div>
+        {/* When searching, show flat results */}
+        {searchQuery.trim() ? (
+          <Section title={`🔍 Search Results`} subtitle={`${filtered.length} result${filtered.length !== 1 ? "s" : ""} for "${searchQuery}"`}>
+            {filtered.length > 0 ? (
+              <motion.div variants={stagger} initial="hidden" animate="show" className={`grid ${gridCols} gap-3 md:gap-4`}>
+                {filtered.map((r) => (
+                  <motion.div key={r.id} variants={fadeUp}>
+                    <RestaurantCard restaurant={r} />
+                  </motion.div>
+                ))}
+              </motion.div>
+            ) : (
+              <div className="text-center py-10 text-muted-foreground">
+                <p className="text-lg font-display font-bold">No results found 😕</p>
+                <p className="text-sm">Try a different search term</p>
+              </div>
+            )}
           </Section>
-        )}
-
-        {/* Cheapest */}
-        {activeCategory === "all" && (
-          <Section title="💰 Cheapest Eats" subtitle="Most affordable meals nearby">
-            <motion.div variants={stagger} initial="hidden" animate="show" className={`grid ${gridCols} gap-3 md:gap-4`}>
-              {cheapest.map((r) => (
-                <motion.div key={r.id} variants={fadeUp}>
-                  <RestaurantCard restaurant={r} />
-                </motion.div>
-              ))}
-            </motion.div>
-          </Section>
-        )}
-
-        {/* Fastest */}
-        {activeCategory === "all" && (
-          <Section title="⚡ Fastest Delivery" subtitle={deliveryMode === "express" ? "Express mode" : "Saver mode"}>
-            <motion.div variants={stagger} initial="hidden" animate="show" className={`grid ${gridCols} gap-3 md:gap-4`}>
-              {fastest.map((r) => (
-                <motion.div key={r.id} variants={fadeUp}>
-                  <RestaurantCard restaurant={r} />
-                </motion.div>
-              ))}
-            </motion.div>
-          </Section>
-        )}
-
-        {/* All / Filtered */}
-        {activeCategory !== "all" && (
+        ) : activeCategory !== "all" ? (
           <motion.div variants={stagger} initial="hidden" animate="show" className={`grid ${gridCols} gap-3 md:gap-4`}>
             {filtered.map((r) => (
               <motion.div key={r.id} variants={fadeUp}>
@@ -162,6 +153,41 @@ const Index = () => {
               </motion.div>
             ))}
           </motion.div>
+        ) : (
+          <>
+            {/* Support Local Section */}
+            <Section title="🏠 Support Local" subtitle="Small businesses near you">
+              <motion.div variants={stagger} initial="hidden" animate="show" className={`grid ${gridCols} gap-3 md:gap-4`}>
+                {localSpots.map((r) => (
+                  <motion.div key={r.id} variants={fadeUp}>
+                    <RestaurantCard restaurant={r} />
+                  </motion.div>
+                ))}
+              </motion.div>
+            </Section>
+
+            {/* Cheapest */}
+            <Section title="💰 Cheapest Eats" subtitle="Most affordable meals nearby">
+              <motion.div variants={stagger} initial="hidden" animate="show" className={`grid ${gridCols} gap-3 md:gap-4`}>
+                {cheapest.map((r) => (
+                  <motion.div key={r.id} variants={fadeUp}>
+                    <RestaurantCard restaurant={r} />
+                  </motion.div>
+                ))}
+              </motion.div>
+            </Section>
+
+            {/* Fastest */}
+            <Section title="⚡ Fastest Delivery" subtitle={deliveryMode === "express" ? "Express mode" : "Saver mode"}>
+              <motion.div variants={stagger} initial="hidden" animate="show" className={`grid ${gridCols} gap-3 md:gap-4`}>
+                {fastest.map((r) => (
+                  <motion.div key={r.id} variants={fadeUp}>
+                    <RestaurantCard restaurant={r} />
+                  </motion.div>
+                ))}
+              </motion.div>
+            </Section>
+          </>
         )}
       </div>
 
