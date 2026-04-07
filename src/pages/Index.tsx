@@ -32,9 +32,21 @@ const Index = () => {
   const displayName = user?.user_metadata?.display_name || user?.email?.split("@")[0] || "there";
 
   const filtered = useMemo(() => {
-    if (activeCategory === "all") return restaurants;
-    return restaurants.filter((r) => r.cuisine === activeCategory);
-  }, [activeCategory]);
+    let list = restaurants;
+    if (activeCategory !== "all") {
+      list = list.filter((r) => r.cuisine === activeCategory);
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      list = list.filter(
+        (r) =>
+          r.name.toLowerCase().includes(q) ||
+          r.cuisine.toLowerCase().includes(q) ||
+          r.menu.some((m) => m.name.toLowerCase().includes(q))
+      );
+    }
+    return list;
+  }, [activeCategory, searchQuery]);
 
   const cheapest = useMemo(
     () => [...restaurants].sort((a, b) => a.menu[0].price - b.menu[0].price).slice(0, 3),
