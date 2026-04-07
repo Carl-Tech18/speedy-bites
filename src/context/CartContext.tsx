@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 import type { MenuItem, Restaurant } from "@/data/restaurants";
 
 export type DeliveryMode = "saver" | "express";
@@ -26,6 +26,8 @@ interface CartContextType extends CartState {
   total: number;
 }
 
+const CART_STORAGE_KEY = "quickbite-cart";
+
 const CartContext = createContext<CartContextType | null>(null);
 
 export const useCart = () => {
@@ -34,16 +36,34 @@ export const useCart = () => {
   return ctx;
 };
 
+const loadCartFromStorage = (): CartState => {
+  try {
+    const stored = localStorage.getItem(CART_STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (parsed.items && Array.isArray(parsed.items)) {
+        return parsed;
+      }
+    }
+  } catch {}
+  return { items: [], restaurant: null, deliveryMode: "saver" };
+};
+
+const saveCartToStorage = (state: CartState) => {
+  try {
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(state));
+  } catch {}
+};
+
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [state, setState] = useState<CartState>({
-    items: [],
-    restaurant: null,
-    deliveryMode: "saver",
-  });
+  const [state, setState] = useState<CartState>(loadCartFromStorage);
+
+  useEffect(() => {
+    saveCartToStorage(state);
+  }, [state]);
 
   const addItem = useCallback((item: MenuItem, restaurant: Restaurant) => {
     setState((prev) => {
-      // If different restaurant, clear cart
       if (prev.restaurant && prev.restaurant.id !== restaurant.id) {
         return { ...prev, restaurant, items: [{ menuItem: item, quantity: 1 }] };
       }
