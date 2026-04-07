@@ -21,7 +21,7 @@ const CartBar = forwardRef<HTMLDivElement>((_, ref) => {
         >
           <button
             onClick={() => navigate("/cart")}
-            className="w-full max-w-md mx-auto md:max-w-none md:mx-0 flex items-center justify-between bg-primary text-primary-foreground rounded-2xl px-5 py-4 shadow-2xl hover:shadow-primary/30 hover:opacity-95 transition-all md:gap-6"
+            className="w-full max-w-md mx-auto md:max-w-none md:mx-0 flex items-center justify-between bg-primary text-primary-foreground rounded-2xl px-5 py-4 shadow-2xl shadow-primary/30 hover:shadow-primary/40 hover:opacity-95 transition-all md:gap-6"
           >
             <div className="flex items-center gap-3">
               <div className="relative">
@@ -30,17 +30,17 @@ const CartBar = forwardRef<HTMLDivElement>((_, ref) => {
                   key={totalItems}
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  className="absolute -top-2 -right-2 w-5 h-5 bg-badge-new text-foreground text-xs font-bold rounded-full flex items-center justify-center"
+                  className="absolute -top-2 -right-2.5 w-5 h-5 bg-badge-new text-foreground text-xs font-extrabold rounded-full flex items-center justify-center shadow-sm"
                 >
                   {totalItems}
                 </motion.span>
               </div>
-              <span className="text-sm font-medium">
+              <span className="text-sm font-bold">
                 {restaurant?.name}
               </span>
             </div>
-            <div className="flex items-center gap-1">
-              <span className="font-bold text-lg">₱{total.toFixed(0)}</span>
+            <div className="flex items-center gap-1.5">
+              <span className="font-extrabold text-lg">₱{total.toFixed(0)}</span>
               <ChevronRight className="w-4 h-4 opacity-70" />
             </div>
           </button>

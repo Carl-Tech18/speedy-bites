@@ -1,11 +1,12 @@
 import { Zap, Leaf } from "lucide-react";
 import { useCart, type DeliveryMode } from "@/context/CartContext";
+import { motion } from "framer-motion";
 
 const DeliveryToggle = () => {
   const { deliveryMode, setDeliveryMode } = useCart();
 
   return (
-    <div className="flex rounded-full bg-muted p-1 gap-1">
+    <div className="flex rounded-2xl bg-muted p-1 gap-1">
       <ToggleOption
         mode="saver"
         active={deliveryMode === "saver"}
@@ -39,16 +40,20 @@ const ToggleOption = ({
 }) => (
   <button
     onClick={onClick}
-    className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${
+    className={`relative flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold transition-all ${
       active
-        ? mode === "saver"
-          ? "bg-saver text-accent-foreground shadow-sm"
-          : "bg-express text-primary-foreground shadow-sm"
+        ? "text-primary-foreground"
         : "text-muted-foreground hover:text-foreground"
     }`}
   >
-    {icon}
-    {label}
+    {active && (
+      <motion.div
+        layoutId="delivery-toggle"
+        className={`absolute inset-0 rounded-xl shadow-sm ${mode === "saver" ? "bg-saver" : "bg-express"}`}
+        transition={{ type: "spring", damping: 30, stiffness: 400 }}
+      />
+    )}
+    <span className="relative z-10 flex items-center gap-1.5">{icon}{label}</span>
   </button>
 );
 
