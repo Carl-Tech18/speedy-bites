@@ -521,6 +521,43 @@ const OwnerDashboard = () => {
                   >
                     {editingMenuIdx === idx ? (
                       <>
+                        {/* Menu item image upload */}
+                        <div
+                          onClick={() => menuImgInputRef.current?.click()}
+                          className="relative w-full h-32 rounded-2xl bg-background border-2 border-dashed border-border overflow-hidden cursor-pointer hover:border-primary/30 transition-colors"
+                        >
+                          {item.image_url ? (
+                            <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+                              <ImagePlus className="w-6 h-6 mb-1" />
+                              <span className="text-xs font-medium">Upload item photo</span>
+                            </div>
+                          )}
+                          {uploadingImg && editingMenuIdx === idx && (
+                            <div className="absolute inset-0 bg-background/70 flex items-center justify-center">
+                              <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                            </div>
+                          )}
+                        </div>
+                        <input
+                          ref={menuImgInputRef}
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            setUploadingImg(true);
+                            const url = await handleImageUpload(file, "menu");
+                            if (url) {
+                              const updated = [...menuItems];
+                              updated[idx] = { ...updated[idx], image_url: url };
+                              setMenuItems(updated);
+                            }
+                            setUploadingImg(false);
+                          }}
+                        />
                         <input
                           type="text"
                           value={item.name}
