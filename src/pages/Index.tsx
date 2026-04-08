@@ -43,7 +43,7 @@ const Index = () => {
       list = list.filter((r) => r.cuisine === activeCategory);
     }
     return list;
-  }, [activeCategory]);
+  }, [activeCategory, restaurants]);
 
   // For search: find matching menu items across all restaurants
   const searchResults = useMemo(() => {
@@ -64,7 +64,7 @@ const Index = () => {
 
   const cheapest = useMemo(
     () => [...restaurants].sort((a, b) => a.menu[0].price - b.menu[0].price).slice(0, 3),
-    []
+    [restaurants]
   );
 
   const fastest = useMemo(
@@ -72,10 +72,10 @@ const Index = () => {
       [...restaurants]
         .sort((a, b) => a.deliveryTime[deliveryMode] - b.deliveryTime[deliveryMode])
         .slice(0, 3),
-    [deliveryMode]
+    [deliveryMode, restaurants]
   );
 
-  const localSpots = useMemo(() => restaurants.filter((r) => r.isLocal), []);
+  const localSpots = useMemo(() => restaurants.filter((r) => r.isLocal), [restaurants]);
 
   const gridCols = "grid-cols-2 md:grid-cols-3 lg:grid-cols-4";
 
