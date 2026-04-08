@@ -1,5 +1,7 @@
+import { useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { restaurants } from "@/data/restaurants";
+import { restaurants as staticRestaurants } from "@/data/restaurants";
+import { useOwnerRestaurants } from "@/hooks/useOwnerRestaurants";
 import { useCart } from "@/context/CartContext";
 import CartBar from "@/components/CartBar";
 import { ArrowLeft, Star, Clock, MapPin, Plus, Minus, Share2 } from "lucide-react";
@@ -8,7 +10,9 @@ import { motion } from "framer-motion";
 const RestaurantPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const restaurant = restaurants.find((r) => r.id === id);
+  const { ownerRestaurants } = useOwnerRestaurants();
+  const allRestaurants = useMemo(() => [...staticRestaurants, ...ownerRestaurants], [ownerRestaurants]);
+  const restaurant = allRestaurants.find((r) => r.id === id);
   const { deliveryMode, items, addItem, removeItem, updateQuantity } = useCart();
 
   if (!restaurant) {
