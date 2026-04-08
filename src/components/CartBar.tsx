@@ -5,8 +5,15 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
 const CartBar = forwardRef<HTMLDivElement>((_, ref) => {
-  const { totalItems, total, restaurant } = useCart();
+  const { totalItems, total, restaurants } = useCart();
   const navigate = useNavigate();
+
+  const label =
+    restaurants.length === 0
+      ? ""
+      : restaurants.length === 1
+      ? restaurants[0].name
+      : `${restaurants.length} restaurants`;
 
   return (
     <AnimatePresence>
@@ -35,9 +42,7 @@ const CartBar = forwardRef<HTMLDivElement>((_, ref) => {
                   {totalItems}
                 </motion.span>
               </div>
-              <span className="text-sm font-bold">
-                {restaurant?.name}
-              </span>
+              <span className="text-sm font-bold">{label}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="font-extrabold text-lg">₱{total.toFixed(0)}</span>

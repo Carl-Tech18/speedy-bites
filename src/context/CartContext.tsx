@@ -6,11 +6,11 @@ export type DeliveryMode = "saver" | "express";
 interface CartItem {
   menuItem: MenuItem;
   quantity: number;
+  restaurant: Restaurant;
 }
 
 interface CartState {
   items: CartItem[];
-  restaurant: Restaurant | null;
   deliveryMode: DeliveryMode;
 }
 
@@ -24,6 +24,10 @@ interface CartContextType extends CartState {
   subtotal: number;
   deliveryFee: number;
   total: number;
+  /** All unique restaurants in the cart */
+  restaurants: Restaurant[];
+  /** For backwards compat — first restaurant or null */
+  restaurant: Restaurant | null;
 }
 
 const CART_STORAGE_KEY = "quickbite-cart";
@@ -42,11 +46,11 @@ const loadCartFromStorage = (): CartState => {
     if (stored) {
       const parsed = JSON.parse(stored);
       if (parsed.items && Array.isArray(parsed.items)) {
-        return parsed;
+        return { items: parsed.items, deliveryMode: parsed.deliveryMode || "saver" };
       }
     }
   } catch {}
-  return { items: [], restaurant: null, deliveryMode: "saver" };
+  return { items: [], deliveryMode: "saver" };
 };
 
 const saveCartToStorage = (state: CartState) => {
@@ -64,36 +68,32 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const addItem = useCallback((item: MenuItem, restaurant: Restaurant) => {
     setState((prev) => {
-      if (prev.restaurant && prev.restaurant.id !== restaurant.id) {
-        return { ...prev, restaurant, items: [{ menuItem: item, quantity: 1 }] };
-      }
       const existing = prev.items.find((i) => i.menuItem.id === item.id);
       if (existing) {
         return {
           ...prev,
-          restaurant,
           items: prev.items.map((i) =>
             i.menuItem.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
           ),
         };
       }
-      return { ...prev, restaurant, items: [...prev.items, { menuItem: item, quantity: 1 }] };
+      return { ...prev, items: [...prev.items, { menuItem: item, quantity: 1, restaurant }] };
     });
   }, []);
 
   const removeItem = useCallback((itemId: string) => {
-    setState((prev) => {
-      const items = prev.items.filter((i) => i.menuItem.id !== itemId);
-      return { ...prev, items, restaurant: items.length ? prev.restaurant : null };
-    });
+    setState((prev) => ({
+      ...prev,
+      items: prev.items.filter((i) => i.menuItem.id !== itemId),
+    }));
   }, []);
 
   const updateQuantity = useCallback((itemId: string, quantity: number) => {
     if (quantity <= 0) {
-      setState((prev) => {
-        const items = prev.items.filter((i) => i.menuItem.id !== itemId);
-        return { ...prev, items, restaurant: items.length ? prev.restaurant : null };
-      });
+      setState((prev) => ({
+        ...prev,
+        items: prev.items.filter((i) => i.menuItem.id !== itemId),
+      }));
       return;
     }
     setState((prev) => ({
@@ -107,19 +107,28 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const clearCart = useCallback(() => {
-    setState({ items: [], restaurant: null, deliveryMode: "saver" });
+    setState({ items: [], deliveryMode: "saver" });
   }, []);
 
   const totalItems = state.items.reduce((sum, i) => sum + i.quantity, 0);
   const subtotal = state.items.reduce((sum, i) => sum + i.menuItem.price * i.quantity, 0);
-  const deliveryFee = state.restaurant
-    ? state.restaurant.deliveryFee[state.deliveryMode]
-    : 0;
+
+  // Unique restaurants in cart
+  const restaurantsMap = new Map<string, Restaurant>();
+  state.items.forEach((i) => restaurantsMap.set(i.restaurant.id, i.restaurant));
+  const restaurants = Array.from(restaurantsMap.values());
+
+  // Sum delivery fees from all unique restaurants
+  const deliveryFee = restaurants.reduce(
+    (sum, r) => sum + r.deliveryFee[state.deliveryMode],
+    0
+  );
   const total = subtotal + deliveryFee;
+  const restaurant = restaurants[0] || null;
 
   return (
     <CartContext.Provider
-      value={{ ...state, addItem, removeItem, updateQuantity, setDeliveryMode, clearCart, totalItems, subtotal, deliveryFee, total }}
+      value={{ ...state, addItem, removeItem, updateQuantity, setDeliveryMode, clearCart, totalItems, subtotal, deliveryFee, total, restaurants, restaurant }}
     >
       {children}
     </CartContext.Provider>
