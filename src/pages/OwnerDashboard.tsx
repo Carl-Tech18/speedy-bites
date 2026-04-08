@@ -615,6 +615,13 @@ const OwnerDashboard = () => {
                       </>
                     ) : (
                       <div className="flex items-center gap-3">
+                        {item.image_url ? (
+                          <img src={item.image_url} alt={item.name} className="w-12 h-12 rounded-xl object-cover flex-shrink-0" />
+                        ) : (
+                          <div className="w-12 h-12 rounded-xl bg-background flex items-center justify-center flex-shrink-0">
+                            <ImagePlus className="w-4 h-4 text-muted-foreground/50" />
+                          </div>
+                        )}
                         <GripVertical className="w-4 h-4 text-muted-foreground/50 flex-shrink-0" />
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-bold text-foreground truncate">{item.name || "Unnamed item"}</p>
