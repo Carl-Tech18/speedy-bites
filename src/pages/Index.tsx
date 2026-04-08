@@ -5,7 +5,8 @@ import DeliveryToggle from "@/components/DeliveryToggle";
 import CategoryScroll from "@/components/CategoryScroll";
 import RestaurantCard from "@/components/RestaurantCard";
 import CartBar from "@/components/CartBar";
-import { restaurants } from "@/data/restaurants";
+import { restaurants as staticRestaurants } from "@/data/restaurants";
+import { useOwnerRestaurants } from "@/hooks/useOwnerRestaurants";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import heroFood from "@/assets/hero-food.jpg";
@@ -29,6 +30,9 @@ const Index = () => {
   const navigate = useNavigate();
   const { deliveryMode, addItem } = useCart();
   const { user } = useAuth();
+  const { ownerRestaurants } = useOwnerRestaurants();
+
+  const restaurants = useMemo(() => [...staticRestaurants, ...ownerRestaurants], [ownerRestaurants]);
 
   const displayName = user?.user_metadata?.display_name || user?.email?.split("@")[0] || "there";
 
