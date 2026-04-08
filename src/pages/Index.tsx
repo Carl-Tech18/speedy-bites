@@ -9,8 +9,9 @@ import { restaurants } from "@/data/restaurants";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import heroFood from "@/assets/hero-food.jpg";
-import { Store, Zap, TrendingDown, User } from "lucide-react";
+import { Store, Zap, TrendingDown, User, Plus } from "lucide-react";
 import { motion } from "framer-motion";
+import type { MenuItem, Restaurant } from "@/data/restaurants";
 
 const stagger = {
   hidden: {},
@@ -26,27 +27,36 @@ const Index = () => {
   const [activeCategory, setActiveCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
-  const { deliveryMode } = useCart();
+  const { deliveryMode, addItem } = useCart();
   const { user } = useAuth();
 
   const displayName = user?.user_metadata?.display_name || user?.email?.split("@")[0] || "there";
 
+  // For category filtering (no search)
   const filtered = useMemo(() => {
     let list = restaurants;
     if (activeCategory !== "all") {
       list = list.filter((r) => r.cuisine === activeCategory);
     }
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      list = list.filter(
-        (r) =>
-          r.name.toLowerCase().includes(q) ||
-          r.cuisine.toLowerCase().includes(q) ||
-          r.menu.some((m) => m.name.toLowerCase().includes(q))
-      );
-    }
     return list;
-  }, [activeCategory, searchQuery]);
+  }, [activeCategory]);
+
+  // For search: find matching menu items across all restaurants
+  const searchResults = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const q = searchQuery.toLowerCase();
+    const results: { restaurant: Restaurant; menuItem: MenuItem }[] = [];
+    restaurants.forEach((r) => {
+      // If restaurant name matches, include all its items
+      const nameMatch = r.name.toLowerCase().includes(q) || r.cuisine.toLowerCase().includes(q);
+      r.menu.forEach((item) => {
+        if (nameMatch || item.name.toLowerCase().includes(q) || item.description.toLowerCase().includes(q)) {
+          results.push({ restaurant: r, menuItem: item });
+        }
+      });
+    });
+    return results;
+  }, [searchQuery]);
 
   const cheapest = useMemo(
     () => [...restaurants].sort((a, b) => a.menu[0].price - b.menu[0].price).slice(0, 3),
@@ -127,14 +137,14 @@ const Index = () => {
         {/* Categories */}
         <CategoryScroll active={activeCategory} onChange={setActiveCategory} />
 
-        {/* When searching, show flat results */}
+        {/* Search results: show individual menu items */}
         {searchQuery.trim() ? (
-          <Section title={`🔍 Search Results`} subtitle={`${filtered.length} result${filtered.length !== 1 ? "s" : ""} for "${searchQuery}"`}>
-            {filtered.length > 0 ? (
-              <motion.div variants={stagger} initial="hidden" animate="show" className={`grid ${gridCols} gap-3 md:gap-4`}>
-                {filtered.map((r) => (
-                  <motion.div key={r.id} variants={fadeUp}>
-                    <RestaurantCard restaurant={r} />
+          <Section title="🔍 Search Results" subtitle={`${searchResults.length} result${searchResults.length !== 1 ? "s" : ""} for "${searchQuery}"`}>
+            {searchResults.length > 0 ? (
+              <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-2.5 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4 md:space-y-0">
+                {searchResults.map(({ restaurant: r, menuItem }) => (
+                  <motion.div key={menuItem.id} variants={fadeUp}>
+                    <SearchResultItem menuItem={menuItem} restaurant={r} onAdd={() => addItem(menuItem, r)} />
                   </motion.div>
                 ))}
               </motion.div>
@@ -155,7 +165,6 @@ const Index = () => {
           </motion.div>
         ) : (
           <>
-            {/* Support Local Section */}
             <Section title="🏠 Support Local" subtitle="Small businesses near you">
               <motion.div variants={stagger} initial="hidden" animate="show" className={`grid ${gridCols} gap-3 md:gap-4`}>
                 {localSpots.map((r) => (
@@ -166,7 +175,6 @@ const Index = () => {
               </motion.div>
             </Section>
 
-            {/* Cheapest */}
             <Section title="💰 Cheapest Eats" subtitle="Most affordable meals nearby">
               <motion.div variants={stagger} initial="hidden" animate="show" className={`grid ${gridCols} gap-3 md:gap-4`}>
                 {cheapest.map((r) => (
@@ -177,7 +185,6 @@ const Index = () => {
               </motion.div>
             </Section>
 
-            {/* Fastest */}
             <Section title="⚡ Fastest Delivery" subtitle={deliveryMode === "express" ? "Express mode" : "Saver mode"}>
               <motion.div variants={stagger} initial="hidden" animate="show" className={`grid ${gridCols} gap-3 md:gap-4`}>
                 {fastest.map((r) => (
@@ -213,5 +220,41 @@ const QuickStat = ({ icon, label, sub, color }: { icon: React.ReactNode; label: 
     <div className="text-[10px] font-bold opacity-60">{sub}</div>
   </div>
 );
+
+const SearchResultItem = ({ menuItem, restaurant, onAdd }: { menuItem: MenuItem; restaurant: Restaurant; onAdd: () => void }) => {
+  const navigate = useNavigate();
+  return (
+    <div className="flex gap-3.5 bg-card rounded-3xl border-2 border-border/60 p-3.5 hover:border-primary/20 hover:shadow-md transition-all">
+      <img
+        src={menuItem.image}
+        alt={menuItem.name}
+        loading="lazy"
+        width={80}
+        height={80}
+        className="w-20 h-20 rounded-2xl object-cover flex-shrink-0"
+      />
+      <div className="flex-1 min-w-0">
+        <h3 className="font-extrabold text-foreground text-sm">{menuItem.name}</h3>
+        <button
+          onClick={() => navigate(`/restaurant/${restaurant.id}`)}
+          className="text-[10px] font-bold text-primary hover:underline"
+        >
+          {restaurant.name}
+        </button>
+        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1 font-medium">{menuItem.description}</p>
+        <div className="flex items-center justify-between mt-2">
+          <span className="font-extrabold text-foreground">₱{menuItem.price}</span>
+          <motion.button
+            whileTap={{ scale: 0.85 }}
+            onClick={onAdd}
+            className="w-9 h-9 rounded-xl bg-primary text-primary-foreground flex items-center justify-center shadow-md shadow-primary/25"
+          >
+            <Plus className="w-4 h-4" />
+          </motion.button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default Index;
