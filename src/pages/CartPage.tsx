@@ -34,15 +34,20 @@ const CartPage = () => {
         }));
         const groupSubtotal = group.items.reduce((s, i) => s + i.menuItem.price * i.quantity, 0);
         const groupFee = group.restaurant.deliveryFee[deliveryMode];
+        // Extract real restaurant ID for owner restaurants
+        const realRestaurantId = group.restaurant.id.startsWith("owner-")
+          ? group.restaurant.id.replace("owner-", "")
+          : null;
         const { error } = await supabase.from("orders").insert({
           user_id: user.id,
           restaurant_name: group.restaurant.name,
+          restaurant_id: realRestaurantId,
           items: orderItems,
           subtotal: groupSubtotal,
           delivery_fee: groupFee,
           total: groupSubtotal + groupFee,
           delivery_mode: deliveryMode,
-          status: "delivered",
+          status: "pending",
         } as any);
         if (error) throw error;
       }
