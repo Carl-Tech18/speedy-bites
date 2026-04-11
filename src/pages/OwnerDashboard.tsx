@@ -696,3 +696,11 @@ const OwnerDashboard = () => {
               )}
             </motion.div>
             )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default OwnerDashboard;
