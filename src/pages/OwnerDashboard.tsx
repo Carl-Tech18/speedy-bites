@@ -4,9 +4,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
   ArrowLeft, Plus, Trash2, Save, Loader2, ImagePlus, Store,
-  DollarSign, FileText, GripVertical
+  DollarSign, FileText, GripVertical, ClipboardList
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import OwnerOrders from "@/components/OwnerOrders";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface OwnerRestaurant {
@@ -46,6 +48,7 @@ const OwnerDashboard = () => {
   const [menuItems, setMenuItems] = useState<OwnerMenuItem[]>([]);
   const [editingMenuIdx, setEditingMenuIdx] = useState<number | null>(null);
   const [uploadingImg, setUploadingImg] = useState(false);
+  const [activeTab, setActiveTab] = useState<"menu" | "orders">("menu");
 
   const [form, setForm] = useState({
     name: "", description: "", cuisine: "rice", address: "", phone: "",
