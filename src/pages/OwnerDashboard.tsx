@@ -9,7 +9,6 @@ import {
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import OwnerOrders from "@/components/OwnerOrders";
-import { motion, AnimatePresence } from "framer-motion";
 
 interface OwnerRestaurant {
   id: string;
