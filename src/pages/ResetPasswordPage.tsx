@@ -16,6 +16,11 @@ const ResetPasswordPage = () => {
     if (hash.includes("type=recovery")) {
       setReady(true);
     }
+    // Check if navigated from OTP verification
+    const state = window.history.state?.usr;
+    if (state?.fromOtp) {
+      setReady(true);
+    }
     // Also listen for auth events
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === "PASSWORD_RECOVERY") {
