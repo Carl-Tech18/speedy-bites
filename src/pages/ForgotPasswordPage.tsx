@@ -18,8 +18,8 @@ const ForgotPasswordPage = () => {
         redirectTo: `${window.location.origin}/reset-password`,
       });
       if (error) throw error;
-      setSent(true);
-      toast.success("Reset link sent! Check your email.");
+      toast.success("Reset code sent! Check your email.");
+      navigate("/verify-otp", { state: { email, type: "recovery" } });
     } catch (err: any) {
       toast.error(err.message);
     } finally {

@@ -52,6 +52,7 @@ export type Database = {
           delivery_mode: string
           id: string
           items: Json
+          restaurant_id: string | null
           restaurant_name: string
           status: string
           subtotal: number
@@ -65,6 +66,7 @@ export type Database = {
           delivery_mode?: string
           id?: string
           items?: Json
+          restaurant_id?: string | null
           restaurant_name: string
           status?: string
           subtotal?: number
@@ -78,13 +80,22 @@ export type Database = {
           delivery_mode?: string
           id?: string
           items?: Json
+          restaurant_id?: string | null
           restaurant_name?: string
           status?: string
           subtotal?: number
           total?: number
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "orders_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "owner_restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       owner_menu_items: {
         Row: {

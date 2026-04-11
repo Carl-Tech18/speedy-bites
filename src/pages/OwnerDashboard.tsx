@@ -4,10 +4,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
   ArrowLeft, Plus, Trash2, Save, Loader2, ImagePlus, Store,
-  DollarSign, FileText, GripVertical
+  DollarSign, FileText, GripVertical, ClipboardList
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import OwnerOrders from "@/components/OwnerOrders";
 
 interface OwnerRestaurant {
   id: string;
@@ -46,6 +47,7 @@ const OwnerDashboard = () => {
   const [menuItems, setMenuItems] = useState<OwnerMenuItem[]>([]);
   const [editingMenuIdx, setEditingMenuIdx] = useState<number | null>(null);
   const [uploadingImg, setUploadingImg] = useState(false);
+  const [activeTab, setActiveTab] = useState<"menu" | "orders">("menu");
 
   const [form, setForm] = useState({
     name: "", description: "", cuisine: "rice", address: "", phone: "",
@@ -486,7 +488,54 @@ const OwnerDashboard = () => {
               </motion.button>
             </motion.div>
 
-            {/* Menu Items */}
+            {/* Tabs: Menu / Orders */}
+            <div className="flex rounded-2xl bg-muted p-1.5">
+              <button
+                onClick={() => setActiveTab("menu")}
+                className={`relative flex-1 py-2.5 rounded-xl text-sm font-bold transition-colors ${
+                  activeTab === "menu" ? "text-primary-foreground" : "text-muted-foreground"
+                }`}
+              >
+                {activeTab === "menu" && (
+                  <motion.div
+                    layoutId="owner-tab"
+                    className="absolute inset-0 bg-primary rounded-xl shadow-md"
+                    transition={{ type: "spring", damping: 30, stiffness: 400 }}
+                  />
+                )}
+                <span className="relative z-10 flex items-center justify-center gap-1.5">
+                  <FileText className="w-3.5 h-3.5" /> Menu
+                </span>
+              </button>
+              <button
+                onClick={() => setActiveTab("orders")}
+                className={`relative flex-1 py-2.5 rounded-xl text-sm font-bold transition-colors ${
+                  activeTab === "orders" ? "text-primary-foreground" : "text-muted-foreground"
+                }`}
+              >
+                {activeTab === "orders" && (
+                  <motion.div
+                    layoutId="owner-tab"
+                    className="absolute inset-0 bg-primary rounded-xl shadow-md"
+                    transition={{ type: "spring", damping: 30, stiffness: 400 }}
+                  />
+                )}
+                <span className="relative z-10 flex items-center justify-center gap-1.5">
+                  <ClipboardList className="w-3.5 h-3.5" /> Orders
+                </span>
+              </button>
+            </div>
+
+            {activeTab === "orders" ? (
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-card rounded-3xl p-5 shadow-sm border-2 border-border/50"
+              >
+                <OwnerOrders restaurantId={restaurant.id} />
+              </motion.div>
+            ) : (
+            /* Menu Items */
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
@@ -646,6 +695,7 @@ const OwnerDashboard = () => {
                 </div>
               )}
             </motion.div>
+            )}
           </>
         )}
       </div>

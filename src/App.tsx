@@ -15,6 +15,7 @@ import ResetPasswordPage from "./pages/ResetPasswordPage";
 import ProfilePage from "./pages/ProfilePage";
 import OwnerDashboard from "./pages/OwnerDashboard";
 import IdVerificationPage from "./pages/IdVerificationPage";
+import VerifyOTPPage from "./pages/VerifyOTPPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -54,6 +55,7 @@ const App = () => (
                 <Route path="/auth" element={<PublicRoute><AuthPage /></PublicRoute>} />
                 <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                 <Route path="/reset-password" element={<ResetPasswordPage />} />
+                <Route path="/verify-otp" element={<VerifyOTPPage />} />
                 <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
                 <Route path="/restaurant/:id" element={<ProtectedRoute><RestaurantPage /></ProtectedRoute>} />
                 <Route path="/cart" element={<ProtectedRoute><CartPage /></ProtectedRoute>} />

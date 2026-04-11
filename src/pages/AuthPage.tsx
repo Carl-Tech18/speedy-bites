@@ -27,7 +27,7 @@ const AuthPage = () => {
         toast.success("Welcome back! 🎉");
         navigate("/");
       } else {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email, password,
           options: { data: { display_name: displayName }, emailRedirectTo: window.location.origin },
         });
@@ -40,6 +40,12 @@ const AuthPage = () => {
             return;
           }
           throw error;
+        }
+        // If email confirmation is required, redirect to OTP page
+        if (data.user && !data.session) {
+          toast.success("Check your email for a verification code!");
+          navigate("/verify-otp", { state: { email, type: "signup" } });
+          return;
         }
         toast.success("Account created! Welcome! 🎉");
         navigate("/");
